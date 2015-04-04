@@ -11,7 +11,7 @@
 #include "Timer.h"
 #include "system_setup.h"
 #include "usart.h"
-#include "drv_adc.h"
+
 
 
 // ----------------------------------------------------------------------------
@@ -59,13 +59,70 @@ constexpr Timer::ticks_t BLINK_OFF_TICKS = Timer::FREQUENCY_HZ - BLINK_ON_TICKS;
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 #pragma GCC diagnostic ignored "-Wreturn-type"
+GPIO_InitTypeDef GPIO_InitStructure;
+ADC_InitTypeDef  ADC_InitStructure;
+
+void stat_adc_stuff(){
+	/* Configure PA.01 (ADC Channel1) as analog input -------------------------*/
+		  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1;
+		  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+		  GPIO_Init(GPIOA, &GPIO_InitStructure);
+
+		  ADC_InitStructure.ADC_Mode = ADC_Mode_Independent;
+		  ADC_InitStructure.ADC_ScanConvMode = DISABLE; // Single Channel
+		  ADC_InitStructure.ADC_ContinuousConvMode = DISABLE; // Scan on Demand
+		  ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_None;
+		  ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
+		  ADC_InitStructure.ADC_NbrOfChannel = 1;
+
+		  ADC_Init(ADC1, &ADC_InitStructure);
+
+		  ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_55Cycles5);
+
+		  /* Enable ADC1 */
+		  ADC_Cmd(ADC1, ENABLE);
+
+		  /* Enable ADC1 reset calibaration register */
+		  ADC_ResetCalibration(ADC1);
+
+
+		  /* Check the end of ADC1 reset calibration register */
+		  while(ADC_GetResetCalibrationStatus(ADC1));
+
+		  /* Start ADC1 calibaration */
+		  ADC_StartCalibration(ADC1);
+
+		  /* Check the end of ADC1 calibration */
+		  while(ADC_GetCalibrationStatus(ADC1));
+
+		  /* Start ADC1 Software Conversion */
+		  ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+
+}
+
+int read_pots(){
+	int adc;
+	if (ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == SET) {
+
+
+		adc = ADC_GetConversionValue(ADC1);
+
+
+		/* Probably overkill */
+		ADC_ClearFlag(ADC1, ADC_FLAG_EOC);
+
+		/* Start ADC1 Software Conversion */
+		ADC_SoftwareStartConvCmd(ADC1, ENABLE);
+	}
+	return adc;
+} // sourcer32@gmail.com
+
+
 
 int main(int argc, char* argv[]) {
 	// Send a greeting to the trace device (skipped on Release).
 	trace_puts("Hello ARM World!");
 
-	Serial serial;
-	serial.init(115200,1);
 
 	// At this stage the system clock should have already been configured
 	// at high speed.
@@ -74,26 +131,25 @@ int main(int argc, char* argv[]) {
 	Timer timer;
 	timer.start();
 
-	drv_adc_config_t adc_params;
-	adc_params.powerAdcChannel = 1;
-	//adcInit(&adc_params);
 	// Perform all necessary initialisations for the LED.
 	//blinkLed.powerUp();
 	systemInit();
+
+
+    stat_adc_stuff();
+
 	uint32_t seconds = 0;
+
+	//Serial serial;
+	//serial.init(115200,2);
 
 	// Infinite loop
 	while (1) {
 		LED0_ON;
-		//blinkLed.turnOn();
 		timer.sleep(BLINK_ON_TICKS);
 		LED0_OFF;
-		//blinkLed.turnOff();
 		timer.sleep(BLINK_OFF_TICKS);
-		serial.Usart1Put('a');
-		//int16_t var = adcGetChannel(0);
-		//trace_printf("Second %d\n", var);
-
+		trace_printf("ADC %u\n",read_pots());
 		++seconds;
 
 		// Count seconds on the trace device.

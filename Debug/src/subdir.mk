@@ -9,19 +9,16 @@ CPP_SRCS += \
 ../src/usart.cpp 
 
 C_SRCS += \
-../src/_write.c \
-../src/drv_adc.c 
+../src/_write.c 
 
 OBJS += \
 ./src/Timer.o \
 ./src/_write.o \
-./src/drv_adc.o \
 ./src/main.o \
 ./src/usart.o 
 
 C_DEPS += \
-./src/_write.d \
-./src/drv_adc.d 
+./src/_write.d 
 
 CPP_DEPS += \
 ./src/Timer.d \

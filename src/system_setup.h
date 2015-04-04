@@ -53,6 +53,8 @@ uint32_t millis(void)
 {
     return sysTickUptime;
 }
+#define ADC1_DR_Address    ((uint32_t)0x4001244C)
+__IO uint32_t ADC_DualConvertedValueTab[16];
 
 void systemInit(void)
 {
@@ -70,8 +72,9 @@ void systemInit(void)
     SystemCoreClockUpdate();
 
     // Turn on clocks for stuff we use
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2 | RCC_APB1Periph_TIM3 | RCC_APB1Periph_TIM4 | RCC_APB1Periph_I2C2, ENABLE);
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_TIM1 | RCC_APB2Periph_ADC1 | RCC_APB2Periph_USART1, ENABLE);
+    RCC_ADCCLKConfig(RCC_PCLK2_Div4);
+    //RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2 | RCC_APB1Periph_TIM3 | RCC_APB1Periph_TIM4 | RCC_APB1Periph_I2C2, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO | RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB | RCC_APB2Periph_GPIOC | RCC_APB2Periph_TIM1 | RCC_APB2Periph_ADC1 | RCC_APB2Periph_ADC2 | RCC_APB2Periph_USART1, ENABLE);
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
     RCC_ClearFlag();
 
@@ -94,6 +97,7 @@ void systemInit(void)
         GPIO_Init(gpio_cfg[i].gpio, &GPIO_InitStructure);
     }
     // Init cycle counter
+
     cycleCounterInit();
 
     // SysTick
@@ -107,23 +111,6 @@ void delayMicroseconds(uint32_t us)
 {
     uint32_t now = micros();
     while (micros() - now < us);
-}
-
-
-///////////////???????????????????
-#define AIRCR_VECTKEY_MASK    ((uint32_t)0x05FA0000)
-
-void systemReset(bool toBootloader)
-{
-    if (toBootloader)
-    {
-        // 1FFFF000 -> 20000200 -> SP
-        // 1FFFF004 -> 1FFFF021 -> PC
-        *((uint32_t *)0x20004FF0) = 0xDEADBEEF; // 20KB STM32F103
-    }
-
-    // Generate system reset
-    SCB->AIRCR = AIRCR_VECTKEY_MASK | (uint32_t)0x04;
 }
 
 

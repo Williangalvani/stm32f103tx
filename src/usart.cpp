@@ -21,7 +21,7 @@ void Serial::init(int baudrate, int port) {
 
 		//enable bus clocks
 
-		RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1 | RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
+//		RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1 | RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
 
 		//Set USART1 Tx (PA.09) as AF push-pull
 
