@@ -10,18 +10,18 @@ CPP_SRCS += \
 
 C_SRCS += \
 ../src/_write.c \
-../src/stm32f10x_usart.c 
+../src/drv_adc.c 
 
 OBJS += \
 ./src/Timer.o \
 ./src/_write.o \
+./src/drv_adc.o \
 ./src/main.o \
-./src/stm32f10x_usart.o \
 ./src/usart.o 
 
 C_DEPS += \
 ./src/_write.d \
-./src/stm32f10x_usart.d 
+./src/drv_adc.d 
 
 CPP_DEPS += \
 ./src/Timer.d \

@@ -11,6 +11,8 @@
 #include "Timer.h"
 #include "system_setup.h"
 #include "usart.h"
+#include "drv_adc.h"
+
 
 // ----------------------------------------------------------------------------
 //
@@ -72,8 +74,9 @@ int main(int argc, char* argv[]) {
 	Timer timer;
 	timer.start();
 
-	//BlinkLed blinkLed;
-
+	drv_adc_config_t adc_params;
+	adc_params.powerAdcChannel = 1;
+	//adcInit(&adc_params);
 	// Perform all necessary initialisations for the LED.
 	//blinkLed.powerUp();
 	systemInit();
@@ -88,6 +91,9 @@ int main(int argc, char* argv[]) {
 		//blinkLed.turnOff();
 		timer.sleep(BLINK_OFF_TICKS);
 		serial.Usart1Put('a');
+		//int16_t var = adcGetChannel(0);
+		//trace_printf("Second %d\n", var);
+
 		++seconds;
 
 		// Count seconds on the trace device.

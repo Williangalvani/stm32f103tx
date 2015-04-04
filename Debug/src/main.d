@@ -29,7 +29,7 @@ src/main.o: ../src/main.cpp ../system/include/diag/Trace.h ../src/board.h \
  ../system/include/stm32f1-stdperiph/misc.h ../include/Timer.h \
  ../system/include/cmsis/cmsis_device.h \
  ../system/include/cmsis/stm32f10x.h ../src/system_setup.h \
- ../include/usart.h
+ ../include/usart.h ../include/drv_adc.h
 
 ../system/include/diag/Trace.h:
 
@@ -102,3 +102,5 @@ src/main.o: ../src/main.cpp ../system/include/diag/Trace.h ../src/board.h \
 ../src/system_setup.h:
 
 ../include/usart.h:
+
+../include/drv_adc.h:

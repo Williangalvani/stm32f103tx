@@ -29,6 +29,30 @@ static void cycleCounterInit(void)
     usTicks = clocks.SYSCLK_Frequency / 1000000;
 }
 
+// SysTick
+void SysTick_Handler(void)
+{
+    sysTickUptime++;
+}
+
+// Return system uptime in microseconds (rollover in 70minutes)
+uint32_t micros(void)
+{
+    register uint32_t ms, cycle_cnt;
+    do
+    {
+        ms = sysTickUptime;
+        cycle_cnt = SysTick->VAL;
+    }
+    while (ms != sysTickUptime);
+    return (ms * 1000) + (72000 - cycle_cnt) / 72;
+}
+
+// Return system uptime in milliseconds (rollover in 49 days)
+uint32_t millis(void)
+{
+    return sysTickUptime;
+}
 
 void systemInit(void)
 {
@@ -79,7 +103,28 @@ void systemInit(void)
     //delay(100);
 }
 
+void delayMicroseconds(uint32_t us)
+{
+    uint32_t now = micros();
+    while (micros() - now < us);
+}
 
+
+///////////////???????????????????
+#define AIRCR_VECTKEY_MASK    ((uint32_t)0x05FA0000)
+
+void systemReset(bool toBootloader)
+{
+    if (toBootloader)
+    {
+        // 1FFFF000 -> 20000200 -> SP
+        // 1FFFF004 -> 1FFFF021 -> PC
+        *((uint32_t *)0x20004FF0) = 0xDEADBEEF; // 20KB STM32F103
+    }
+
+    // Generate system reset
+    SCB->AIRCR = AIRCR_VECTKEY_MASK | (uint32_t)0x04;
+}
 
 
 #endif /* SYSTEM_SETUP_H_ */
